@@ -1,0 +1,32 @@
+{
+  "name": "minimum.collector",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DanielGelfand/minimum.collector.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DanielGelfand/minimum.collector/issues"
+  },
+  "homepage": "https://github.com/DanielGelfand/minimum.collector#readme",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "blockchain-addressbook": "^0.4.33",
+    "dotenv": "^10.0.0",
+    "ethers": "^5.5.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.16.0",
+    "@babel/core": "^7.16.0",
+    "@babel/node": "^7.16.0",
+    "@babel/preset-env": "^7.16.4"
+  }
+}
