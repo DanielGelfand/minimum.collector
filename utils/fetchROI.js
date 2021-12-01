@@ -38,17 +38,18 @@ const fetchBondROI = async (strat) => {
   return [bondDiscount, bondToUse];
 }
 
-(async () => {
-  const maxBondInfo = await fetchBondROI(strats[0]);
-  console.log("Bond discoint is:", maxBondInfo[0]);
-})()
+// (async () => {
+//   const maxBondInfo = await fetchBondROI(strats[0]);
+//   console.log("Bond discoint is:", maxBondInfo[0]);
+// })()
 
 /**
- * Gets the 5 day staking ROI
+ * Gets the staking ROI for the given time epriod in rebases
  * @param strat - a strategy from strats
- * @returns FLOAT five day staking roi
+ * @param numRebases - number of rebases for ROI calculation (5*3 for 5 day ROI)
+ * @returns FLOAT staking roi
  */
-const fetchStakingROI = async (strat) => {
+const fetchStakingROI = async (strat, numRebases) => {
 
   const provider = new ethers.providers.JsonRpcProvider(chains[strat.chainId].rpc);
 
@@ -69,15 +70,14 @@ const fetchStakingROI = async (strat) => {
 
   const circ = await stakedTokenContract.circulatingSupply();
   const stakingRebase = Number(stakingReward.toString()) / Number(circ.toString());
-  // console.log(stakingRebase);
-  const fiveDayRate = Math.pow(1 + stakingRebase, 5 * 3) - 1;
-  return fiveDayRate;
+  const roi = Math.pow(1 + stakingRebase, numRebases) - 1;
+  return roi;
 
 }
 
-(async () => {
-  console.log("Staking 5-day ROI is:", await fetchStakingROI(strats[0]))
-})()
+// (async () => {
+//   console.log("Staking 5-day ROI is:", await fetchStakingROI(strats[0],15))
+// })()
 
 module.exports = {fetchBondROI, fetchStakingROI};
 
