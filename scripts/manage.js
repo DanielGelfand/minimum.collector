@@ -12,14 +12,16 @@ const run = async () => {
     let isBonding = true; // modify later to check in smart contract
 
     for (let i = 0; i < strats.length; i++) {
-        strat = strats[i];
+        let strat = strats[i];
+        let stratContract = new ethers.Contract(strat["stratAddress"], strat["stratABI"].abi, provider);
         let is44 = strat["is44"];
 
         let stakingAddress = strat["stakingContract"];
         let stakingABI = strat["stakingContractABI"].abi;
 
         let bondAddress = "0x5D449738986ab34280373502031D1513581Cb649"; // read currentBond
-        let bondABI = grabBondWithAddress(strat,bondAddress)["bondABI"].abi;
+        let bond = grabBondWithAddress(strat,bondAddress)
+        let bondABI = bond["bondABI"].abi;
 
         let stakingContract = new ethers.Contract(stakingAddress, stakingABI, provider);
         let bondContract = new ethers.Contract(bondAddress, bondABI, provider);
@@ -37,9 +39,14 @@ const run = async () => {
         
         if (checkOptimal) {
             console.log(checkOptimal);
-            console.log("Checking if bond available...")
+            console.log("Checking if allowed to bond...")
             // Get SpartacusStrategy Contract and check if bonded variable is True
             // If False, stakeToBond
+            let isLP = checkOptimal["bondToken"].include("-")
+            let token0Route = bond["token0Route"];
+            let token1Route = bond["token1Route"];
+            if (isLP) { stratContract.stakeToBondLPAll(bondContract, token0Route, token1Route); }
+            else { stratContract.stakeToBondSingleAll(bondContract, token0Route); }
         }
         else {
             console.log("Continue staking...");
