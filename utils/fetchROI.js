@@ -18,7 +18,7 @@ const fetchBondROI = async (strat) => {
 
   // Gets the market price of the rebase token - SPA,OHM,etc.
   let marketPrice = await getTokenPrice(strat);
-  console.log("Market price:", marketPrice);
+  // console.log("Market price:", marketPrice);
   let bondDiscount = Number.NEGATIVE_INFINITY;
   let bondToUse = null;
   for (let i = 0; i < strat.bonds.length; i++) {

@@ -20,6 +20,7 @@ const canRedeem = async (currentBlock, stakingContract, bondContract, is44) => {
         let endBlock = Number(epochInfo.endBlock);
         console.log("Current Block:", currentBlock);
         console.log("End Block:",endBlock);
+        
         return currentBlock >= endBlock;
     }
 

@@ -1,4 +1,3 @@
-const { convertSymbolTokenMapToAddressTokenMap } = require('blockchain-addressbook/build/util/convertSymbolTokenMapToAddressTokenMap');
 const { Contract, utils, providers, ethers } = require('ethers');
 const {Trade, Route, CurrencyAmount, TradeType, Currency, Pair, Token, TokenAmount, ChainId, Percent} = require('@ac32/spookyswap-sdk');
 
@@ -47,38 +46,39 @@ const calculatePriceImpact = async (rebaseTokenAddr, amountIn, pairAddresses, ro
 
     let tokenIn = constructToken(route[0], 9);
     let tokenOut = constructToken(route.at(-1), 18);
-    let routeSpooky = new Route(pairs, tokenIn, tokenOut);
 
-    console.log("Mid price:", routeSpooky.midPrice.toFixed(5));
-    
+    let routeSpooky = new Route(pairs, tokenIn, tokenOut);
     let trade = new Trade(routeSpooky, new TokenAmount(tokenIn, amountIn * 10e8), TradeType.EXACT_INPUT);
 
-    console.log("Execution Price:", trade.executionPrice.toFixed(2));
     console.log("Input Amount:", trade.inputAmount.toFixed(2));
     console.log("Output Amount:", trade.outputAmount.toFixed(2));
+
     const priceImpactWithFee = trade.priceImpact
     ? new Percent(trade.priceImpact?.numerator, trade.priceImpact?.denominator)
     : undefined;
-    console.log("Price impact:",priceImpactWithFee.toFixed(2));
+    
+    // console.log("Price impact:",priceImpactWithFee.toFixed(2));
 
     return priceImpactWithFee.toFixed(2);
     
 }
 
-(async () => {
-    console.log("Price Impact FHM->DAI:", await calculatePriceImpact(
-        "0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286",
-        1500,
-        ["0xd77fc9c4074b56ecf80009744391942fbfddd88b"],
-        ["0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286", "0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E"])
-    )
+// (async () => {
+//     console.log("Price Impact FHM->DAI:", await calculatePriceImpact(
+//         "0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286",
+//         1500,
+//         ["0xd77fc9c4074b56ecf80009744391942fbfddd88b"],
+//         ["0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286", "0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E"])
+//     )
 
-    console.log();
+//     console.log();
 
-    console.log("Price Impact FHM->MIM:", await calculatePriceImpact(
-        "0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286",
-        15000,
-        ["0xd77fc9c4074b56ecf80009744391942fbfddd88b", "0xe120ffbda0d14f3bb6d6053e90e63c572a66a428", "0x6f86e65b255c9111109d2d2325ca2dfc82456efc"],
-        ["0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286", "0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e", "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83", "0x82f0B8B456c1A451378467398982d4834b6829c1"])
-    )
-})()
+//     console.log("Price Impact FHM->MIM:", await calculatePriceImpact(
+//         "0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286",
+//         15000,
+//         ["0xd77fc9c4074b56ecf80009744391942fbfddd88b", "0xe120ffbda0d14f3bb6d6053e90e63c572a66a428", "0x6f86e65b255c9111109d2d2325ca2dfc82456efc"],
+//         ["0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286", "0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e", "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83", "0x82f0B8B456c1A451378467398982d4834b6829c1"])
+//     )
+// })()
+
+module.exports = {calculatePriceImpact};
