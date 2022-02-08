@@ -50,13 +50,7 @@ const run = async () => {
             let bondABI = bond["bondABI"].abi;
             let bondContract = new ethers.Contract(bondAddress, bondABI, provider);
             let is44 = bond["is44"];
-
-            // let currBlockNum = await provider.getBlockNumber()
-            if (isBonding) { //&& await canRedeem(currBlockNum, stakingContract, bondContract, is44)) {
-                console.log("Can redeem bond!");
-                await stratContract.redeemAndStake();
-            }
-            else console.log("Cant redeem bond currently", currBlockNum);
+            console.log("Can redeem bond");
         }   
         else {
             console.log(`Currently not bonding for ${strat.name}`);
