@@ -1,67 +1,111 @@
-const { Contract, utils, providers, ethers } = require('ethers');
-const {Trade, Route, CurrencyAmount, TradeType, Currency, Pair, Token, TokenAmount, ChainId, Percent} = require('@ac32/spookyswap-sdk');
+const { Contract, utils, providers, ethers } = require("ethers");
+const {
+  Trade,
+  Route,
+  CurrencyAmount,
+  TradeType,
+  Currency,
+  Pair,
+  Token,
+  TokenAmount,
+  ChainId,
+  Percent,
+} = require("@ac32/spookyswap-sdk");
 
-const poolAbi =  [
-            {"inputs":[],"name":"getReserves","outputs":[{"internalType":"uint112","name":"_reserve0","type":"uint112"},{"internalType":"uint112","name":"_reserve1","type":"uint112"},{"internalType":"uint32","name":"_blockTimestampLast","type":"uint32"}],"stateMutability":"view","type":"function"},
-            {"inputs":[],"name":"token0","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
-            {"inputs":[],"name":"token1","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}
-        ];
+const poolAbi = [
+  {
+    inputs: [],
+    name: "getReserves",
+    outputs: [
+      { internalType: "uint112", name: "_reserve0", type: "uint112" },
+      { internalType: "uint112", name: "_reserve1", type: "uint112" },
+      { internalType: "uint32", name: "_blockTimestampLast", type: "uint32" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "token0",
+    outputs: [{ internalType: "address", name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "token1",
+    outputs: [{ internalType: "address", name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+];
 
 const constructToken = (tokenAddress, decimals) => {
-    return new Token(ChainId.MAINNET, tokenAddress, decimals, "", "");
-}
+  return new Token(ChainId.MAINNET, tokenAddress, decimals, "", "");
+};
 
+const calculatePriceImpact = async (
+  rebaseTokenAddr,
+  amountIn,
+  pairAddresses,
+  route
+) => {
+  let provider = new ethers.getDefaultProvider("https://rpc.ftm.tools/");
 
-const calculatePriceImpact = async (rebaseTokenAddr, amountIn, pairAddresses, route) => {
+  let router = new Contract(
+    "0xF491e7B69E4244ad4002BC14e878a34207E38c29",
+    [
+      "function getAmountsOut(uint amountIn, address[] memory path) public view returns (uint[] memory amounts)",
+    ],
+    provider
+  );
 
-    let provider = new ethers.getDefaultProvider("https://rpc.ftm.tools/");
+  const pairs = [];
+  for (const pairAddress of pairAddresses) {
+    let poolContract = new Contract(pairAddress, poolAbi, provider);
 
-    let router = new Contract(
-        "0xF491e7B69E4244ad4002BC14e878a34207E38c29",
-        ["function getAmountsOut(uint amountIn, address[] memory path) public view returns (uint[] memory amounts)"],
-        provider
-    )
+    let reserves = await poolContract.getReserves();
+    let token0Address = await poolContract.token0();
+    let token1Address = await poolContract.token1();
 
-    const pairs = []
-    for(const pairAddress of pairAddresses) {
+    token0 = constructToken(
+      token0Address,
+      utils.getAddress(rebaseTokenAddr) == token0Address ? 9 : 18
+    );
+    token1 = constructToken(
+      token1Address,
+      utils.getAddress(rebaseTokenAddr) == token1Address ? 9 : 18
+    );
 
-        let poolContract = new Contract(
-            pairAddress,
-            poolAbi,
-            provider
-        );
+    pairs.push(
+      new Pair(
+        new TokenAmount(token0, reserves._reserve0),
+        new TokenAmount(token1, reserves._reserve1)
+      )
+    );
+  }
 
-        let reserves = await poolContract.getReserves();
-        let token0Address = await poolContract.token0();
-        let token1Address = await poolContract.token1();
+  let tokenIn = constructToken(route[0], 9);
+  let tokenOut = constructToken(route.at(-1), 18);
 
-        token0 = constructToken(token0Address, utils.getAddress(rebaseTokenAddr) == token0Address ? 9 : 18);
-        token1 = constructToken(token1Address, utils.getAddress(rebaseTokenAddr) == token1Address ? 9 : 18);
+  let routeSpooky = new Route(pairs, tokenIn, tokenOut);
+  let trade = new Trade(
+    routeSpooky,
+    new TokenAmount(tokenIn, amountIn * 10e8),
+    TradeType.EXACT_INPUT
+  );
 
-        pairs.push(new Pair(
-            new TokenAmount(token0, reserves._reserve0),
-            new TokenAmount(token1, reserves._reserve1))
-        )
-    }
+  console.log("Input Amount:", trade.inputAmount.toFixed(2));
+  console.log("Output Amount:", trade.outputAmount.toFixed(2));
 
-    let tokenIn = constructToken(route[0], 9);
-    let tokenOut = constructToken(route.at(-1), 18);
-
-    let routeSpooky = new Route(pairs, tokenIn, tokenOut);
-    let trade = new Trade(routeSpooky, new TokenAmount(tokenIn, amountIn * 10e8), TradeType.EXACT_INPUT);
-
-    console.log("Input Amount:", trade.inputAmount.toFixed(2));
-    console.log("Output Amount:", trade.outputAmount.toFixed(2));
-
-    const priceImpactWithFee = trade.priceImpact
+  const priceImpactWithFee = trade.priceImpact
     ? new Percent(trade.priceImpact?.numerator, trade.priceImpact?.denominator)
     : undefined;
-    
-    // console.log("Price impact:",priceImpactWithFee.toFixed(2));
 
-    return priceImpactWithFee.toFixed(2);
-    
-}
+  // console.log("Price impact:",priceImpactWithFee.toFixed(2));
+
+  return priceImpactWithFee.toFixed(2);
+};
 
 // (async () => {
 //     console.log("Price Impact FHM->DAI:", await calculatePriceImpact(
@@ -81,4 +125,4 @@ const calculatePriceImpact = async (rebaseTokenAddr, amountIn, pairAddresses, ro
 //     )
 // })()
 
-module.exports = {calculatePriceImpact};
+module.exports = { calculatePriceImpact };
