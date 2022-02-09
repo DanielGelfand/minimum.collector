@@ -19,13 +19,13 @@ const bondOrStake = async (strat, amountIn) => {
     strat.platformTokenAddress,
     amountIn,
     bondROI[1].pairAddress,
-    bondROI[1].token0Route,
-  )
+    bondROI[1].token0Route
+  );
 
   console.log(`Price Impact From bondorStake: ${priceImpact}%`);
 
   // Include price impact in here in the future
-  if (bondROI[0] - (priceImpact/100) > stakingROI / 2 + 0.01) {
+  if (bondROI[0] - priceImpact / 100 > stakingROI / 2 + 0.01) {
     return bondROI[1];
   }
 

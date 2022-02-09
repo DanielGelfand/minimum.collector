@@ -23,7 +23,9 @@ const getTokenPrice = async (strat) => {
 
     let numeratorIndex = strat.protocolTokenFirst ? 1 : 0;
 
-    let price = Number(reserves[numeratorIndex].toString()) / Number(reserves[1-numeratorIndex].toString());
+    let price =
+      Number(reserves[numeratorIndex].toString()) /
+      Number(reserves[1 - numeratorIndex].toString());
     price = price * Math.pow(10, -9);
     return price;
   } catch (e) {
