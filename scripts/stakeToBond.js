@@ -1,97 +1,49 @@
 const { ethers } = require("ethers");
-const { bondOrStake } = require("../utils/bondOrStake.js");
-const { strats } = require("../data/strats.js");
-const { canRedeem } = require("../utils/checkRebase.js");
-const {
-  ChainId,
-  Token,
-  WETH,
-  Fetcher,
-  Pair,
-  TokenAmount,
-} = require("@ac32/spookyswap-sdk");
+const { shouldBond } = require("../utils/shouldBond");
+const { strats } = require("../data/strats");
 
-// const DAI = new Token(
-//   ChainId.FTMTESTNET,
-//   "0x30a40bc648799a746947417c675e54d5915aca38",
-//   18
-// );
-
-// const FTM = new Token(
-//     ChainId.FTMTESTNET,
-//     "0xfa743d3ea980ec8697d516097d77f91fa5561ebe",
-//     18
-//   );
-
-const provider = ethers.getDefaultProvider("https://rpc.ftm.tools/");
-
-// (async () => {
-//     const pair = await Fetcher.fetchPairData(DAI, FTM, provider);
-//     console.log(pair);
-// })()
-
-// note that you may want/need to handle this async code differently,
-// for example if top-level await is not an option
-
-// Function to be called repeatedly to check if bond can be redeemed and
-// funds moved from staking to bonding
 const run = async () => {
-  for (let i = 0; i < strats.length; i++) {
-    if (strats[i].name != "ftm-fantohm") continue;
+  const args = process.argv.slice(2);
+  const targetStratId = args[0];
+  const provider = ethers.getDefaultProvider("https://rpc.ftm.tools/");
 
-    let strat = strats[i];
-    //console.log("Strat:", strat);
-    console.log("Strat address:", strat.address);
-    
-    let stratContract = new ethers.Contract(
-      strat.address,
-      strat.abi,
-      provider
-    );
-    let isBonding = await stratContract.isBonding();
+  strategy = strats.find(({ id }) => {
+    return id === targetStratId;
+  });
 
-    let stakingAddress = strat["stakingContract"];
-    let stakingABI = strat["stakingContractABI"].abi;
-    let stakingContract = new ethers.Contract(
-      stakingAddress,
-      stakingABI,
-      provider
-    );
+  const stratContract = new ethers.Contract(
+    strategy.address,
+    strategy.abi,
+    provider
+  );
+  const isBonding = await stratContract.isBonding();
 
-    let rebaseBalance = Number(ethers.utils.formatUnits(
-      await stratContract.availableRebaseToken(), 9
-    ));
-    console.log("Rebase balance:", rebaseBalance);
+  //if (isBonding) return;
 
-    let stakeToBond = await bondOrStake(strat, rebaseBalance);
+  const rebaseBalance = Number(
+    ethers.utils.formatUnits(await stratContract.availableRebaseToken(), 9)
+  );
 
-    if (stakeToBond) { // if we should bond
-        console.log(stakeToBond);
-        console.log("Checking if are allowed to bond...")
-        let isLP = stakeToBond["bondToken"].include("-")
-        let token0Route = bond["token0Route"];
-        let token1Route = bond["token1Route"];
-        // if (isLP) { stratContract.stakeToBondLPAll(bondContract, token0Route, token1Route); }
-        // else { stratContract.stakeToBondSingleAll(bondContract, token0Route); }
-    }
-    else {
-        console.log("Continue staking...");
-    }
+  const stakeToBondData = await shouldBond(provider, strategy, rebaseBalance);
 
-    console.log();
+  console.log(stakeToBondData);
+
+  if (stakeToBondData.shouldBond) {
+    console.log("Checking if are allowed to bond...");
+    const token0Route = bond["token0Route"];
+    const token1Route = bond["token1Route"];
+    // if (stakeToBondData.isLP) { stratContract.stakeToBondLPAll(bondContract, token0Route, token1Route); }
+    // else { stratContract.stakeToBondSingleAll(bondContract, token0Route); }
+  } else {
+    console.log("Continue staking...");
   }
 };
 
-// Grabs the bond from a strategy object with the given bond address
-const grabBondWithAddress = (strat, bondAddress) => {
-  for (const bond of strat["bonds"]) {
-    if (bond["bondAddress"] === bondAddress) {
-      return bond;
-    }
-  }
-  return null;
-};
-
-(async () => {
-  await run();
-})();
+if (require.main === module) {
+  run()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}

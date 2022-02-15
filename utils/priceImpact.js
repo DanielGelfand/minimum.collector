@@ -1,4 +1,4 @@
-const { Contract, utils, providers, ethers } = require("ethers");
+const { Contract, utils, ethers } = require("ethers");
 const {
   Trade,
   Route,
@@ -45,13 +45,12 @@ const constructToken = (tokenAddress, decimals) => {
 };
 
 const calculatePriceImpact = async (
+  provider,
   rebaseTokenAddr,
   amountIn,
   pairAddresses,
   route
 ) => {
-  let provider = new ethers.getDefaultProvider("https://rpc.ftm.tools/");
-
   let router = new Contract(
     "0xF491e7B69E4244ad4002BC14e878a34207E38c29",
     [
@@ -95,14 +94,9 @@ const calculatePriceImpact = async (
     TradeType.EXACT_INPUT
   );
 
-  console.log("Input Amount:", trade.inputAmount.toFixed(2));
-  console.log("Output Amount:", trade.outputAmount.toFixed(2));
-
   const priceImpactWithFee = trade.priceImpact
     ? new Percent(trade.priceImpact?.numerator, trade.priceImpact?.denominator)
     : undefined;
-
-  // console.log("Price impact:",priceImpactWithFee.toFixed(2));
 
   return priceImpactWithFee.toFixed(2);
 };
