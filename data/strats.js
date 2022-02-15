@@ -96,7 +96,7 @@ const strats = [
   {
     name: "ftm-fantohm",
     id: "ftm-fantohm-01",
-    address: "0x2e945c73E06e58B63a7DD9F605951fFD4fa3974d", // update after deployment
+    address: "0x2e945c73E06e58B63a7DD9F605951fFD4fa3974d",
     abi: spaStratABI.abi,
     platformToken: "fantohm",
     platformTokenAddress: "0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286",
@@ -111,38 +111,20 @@ const strats = [
         name: "dai",
         bondToken: "DAI",
         pairAddress: ["0xd77fc9c4074b56ecf80009744391942fbfddd88b"],
-        address: "0x462eEC9f8A067f13B5F8F7356D807FF7f0e28c68",
+        address: "0xA6E6e8720C70f4715a34783381d6745a7aC32652",
         token0Route: [
           "0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286",
           "0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E",
         ],
         abi: daiBondAbiSPA.abi,
         is44: false,
-      },
-      {
-        name: "mim",
-        bondToken: "MIM",
-        pairAddress: [
-          "0xd77fc9c4074b56ecf80009744391942fbfddd88b",
-          "0x484237bc35ca671302d19694c66d617142fbc235",
-          "0x3c9ad6268065e425085f11ab8ea803973be6bcf3",
-        ],
-        address: "0x3C1a9b5Ff3196C43BcB05Bf1B7467fbA8e07EE61",
-        // FHM->DAI->USDC->MIM
-        token0Route: [
-          "0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286",
-          "0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e",
-          "0x04068da6c83afcfa0e13ba15a6696662335d5b75",
-          "0x82f0B8B456c1A451378467398982d4834b6829c1",
-        ],
-        abi: daiBondAbiSPA.abi,
-        is44: false,
+        isLp: false,
       },
       {
         name: "fhm-dai",
         bondToken: "FHM-DAI",
         pairAddress: ["0xd77fc9c4074b56ecf80009744391942fbfddd88b"],
-        address: "0x71976906ad5520a1CB23fd40b40437c1A2640bcd",
+        address: "0x485C6b492B733f65d0f834e3Aa16dcD10d4DabE8",
         token0Route: ["0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286"],
         token1Route: [
           "0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286",
@@ -150,6 +132,7 @@ const strats = [
         ],
         abi: spa_daiBondAbiSPA.abi,
         is44: false,
+        isLp: true,
       },
     ],
   },
